@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ...existing content... -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bytebeat ⇄ Image</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "mitt": "https://esm.sh/mitt@3.0.1"
+      }
+    }
+    </script>
+    <!-- ...existing content... -->
+</head>
+<body>
+    <!-- ...existing content... -->
+    <main class="container">
+        <header class="topbar">
+            <h1>Bytebeat ⇄ Image</h1>
+            <button id="audioUnlock" class="primary">Enable Audio</button>
+        </header>
+
+        <section class="panel">
+            <h2>Bytebeat</h2>
+            <div class="row">
+                <label for="presets">Preset</label>
+                <select id="presets">
+                    <option value="(t>>6|t|t>>(t>>9))*t&128">Crunchy</option>
+                    <option value="t*(t>>11&t>>8&123)">Noisy</option>
+                    <option value="(t*5&t>>7)|(t*3&t>>10)">Chiptune</option>
+                    <option value="t*(t>>9|t>>13)&16">Pulse</option>
+                    <option value="(t>>4|t>>5)*t&63">Bit Grid</option>
+                </select>
+            </div>
+            <textarea id="expr" rows="4" spellcheck="false">(t>>6|t|t>>(t>>9))*t&128</textarea>
+            <div class="row">
+                <label for="sr">Sample rate</label>
+                <input id="sr" type="number" value="8000" min="2000" max="48000" step="1000">
+                <label for="bits">Bits</label>
+                <select id="bits">
+                    <option value="8" selected>8-bit</option>
+                    <option value="16">16-bit</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button id="play" class="primary">Play</button>
+                <button id="stop">Stop</button>
+            </div>
+
+            <div class="row">
+                <label for="imgWidth">Image width</label>
+                <input id="imgWidth" type="number" value="512" min="32" max="4096" step="32">
+                <label for="imgHeight">Height</label>
+                <input id="imgHeight" type="number" value="256" min="32" max="4096" step="32">
+            </div>
+            <div class="actions">
+                <button id="renderImage">Render from bytebeat</button>
+                <button id="savePng">Save PNG</button>
+                <button id="saveBbWav">Save WAV</button>
+            </div>
+            <canvas id="bytebeatCanvas" class="canvas" width="512" height="256" aria-label="Bytebeat image"></canvas>
+            <audio id="bytebeatAudio" class="audio-preview" controls></audio>
+        </section>
+
+        <section class="panel">
+            <h2>Image → Bytebeat (audio)</h2>
+            <div class="row">
+                <input id="imgFile" type="file" accept="image/png,image/jpeg,image/webp">
+                <label for="imgSr">Sample rate</label>
+                <input id="imgSr" type="number" value="8000" min="2000" max="48000" step="1000">
+            </div>
+            <div class="actions">
+                <button id="playImage" class="primary">Play Image</button>
+                <button id="stopImage">Stop</button>
+                <button id="saveImageWav">Save WAV</button>
+                <button id="imgToCode">Buffer → Bytebeat code</button>
+            </div>
+            <canvas id="imageCanvas" class="canvas" width="320" height="200" aria-label="Loaded image preview"></canvas>
+            <audio id="imageAudio" class="audio-preview" controls></audio>
+            <p class="small">Audio is produced by scanning image pixels left-to-right, top-to-bottom and mapping grayscale to amplitude.</p>
+        </section>
+
+        <section class="panel">
+            <h2>Audio → Bytebeat Image</h2>
+            <div class="row">
+                <input id="audioFile" type="file" accept="audio/*">
+                <label for="audioSr">Target sample rate</label>
+                <input id="audioSr" type="number" value="8000" min="2000" max="48000" step="1000">
+            </div>
+            <div class="row">
+                <label for="audioImgWidth">Image width</label>
+                <input id="audioImgWidth" type="number" value="512" min="32" max="4096" step="32">
+                <label for="audioImgHeight">Height</label>
+                <input id="audioImgHeight" type="number" value="256" min="32" max="4096" step="32">
+            </div>
+            <div class="actions">
+                <button id="renderAudioImage" class="primary">Render from audio</button>
+                <button id="playAudioImage">Play</button>
+                <button id="stopAudioImage">Stop</button>
+                <button id="saveAudioImagePng">Save PNG</button>
+                <button id="saveAudioImageWav">Save WAV</button>
+                <button id="audioImgToCode">Buffer → Bytebeat code</button>
+            </div>
+            <canvas id="audioImageCanvas" class="canvas" width="512" height="256" aria-label="Audio-derived bytebeat image"></canvas>
+            <p class="small">Audio is converted to an 8-bit bytebeat-like buffer, then scanned into pixels and audio using the same mapping as images.</p>
+        </section>
+
+        <!-- Video → Bytebeat (audio) -->
+        <section class="panel">
+            <h2>Video → Bytebeat (audio)</h2>
+            <div class="row">
+                <input id="videoFile" type="file" accept="video/*">
+                <label for="videoFps">Frames per second</label>
+                <input id="videoFps" type="number" value="30" min="1" max="120" step="1">
+            </div>
+            <div class="actions">
+                <button id="renderVideoAudio" class="primary">Render from video</button>
+                <button id="playVideoAudio">Play</button>
+                <button id="stopVideoAudio">Stop</button>
+                <button id="saveVideoAudioWav">Save WAV</button>
+            </div>
+            <canvas id="videoPreviewCanvas" class="canvas" width="320" height="180" aria-label="Video frame preview"></canvas>
+            <p class="small">The video is sampled at the chosen frames-per-second; each sampled frame becomes one 8‑bit sound frame.</p>
+        </section>
+
+        <footer class="foot">
+            <span>Simple, clean, mobile-friendly. Noto Sans.</span>
+        </footer>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+    <!-- ...existing content... -->
+</body>
+</html>
